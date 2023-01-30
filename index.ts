@@ -10,7 +10,7 @@ const port = process.env.PORT || 8000;
 const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: process.env.REGION || 'eu-west-3'});
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Express +  COUCOU TypeScript Server');
+  res.send('Ca marche! Mais que sur cette route...');
 });
 app.post('/user/register/', async (req: Request, res: Response) => {
   const {email, password, name} = req.body;

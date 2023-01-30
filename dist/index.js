@@ -41,9 +41,9 @@ const AWS = __importStar(require("aws-sdk"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
-const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: process.env.REGION });
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: process.env.REGION || 'eu-west-3' });
 app.get('/', (req, res) => {
-    res.send('Express +  COUCOU TypeScript Server');
+    res.send('Ca marche! Mais que sur cette route...');
 });
 app.post('/user/register/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, name } = req.body;

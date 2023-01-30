@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5932678-bd07-4b16-b92a-22f29ef60297" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ynov/web_mobile/backend-pwa/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../ynov/web_mobile/backend-pwa/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ynov/web_mobile/backend-pwa/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/../ynov/web_mobile/backend-pwa/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../ynov/web_mobile/backend-pwa/api/entities/users.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../ynov/web_mobile/backend-pwa/api/entities/users.ts" afterDir="false" />
@@ -69,7 +71,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="npm.build">
+  <component name="RunManager" selected="npm.dev">
     <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
@@ -102,8 +104,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.build" />
         <item itemvalue="npm.dev" />
+        <item itemvalue="npm.build" />
         <item itemvalue="npm.start" />
       </list>
     </recent_temporary>
@@ -116,7 +118,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1675113933114</updated>
-      <workItem from="1675113934577" duration="5033000" />
+      <workItem from="1675113934577" duration="5747000" />
     </task>
     <servers />
   </component>

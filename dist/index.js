@@ -40,7 +40,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const AWS = __importStar(require("aws-sdk"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: process.env.REGION });
 app.get('/', (req, res) => {
     res.send('Express +  COUCOU TypeScript Server');
@@ -49,7 +49,7 @@ app.post('/user/register/', (req, res) => __awaiter(void 0, void 0, void 0, func
     const { email, password, name } = req.body;
     try {
         const params = {
-            ClientId: `${process.env.CLIENT_ID}`,
+            ClientId: `${process.env.CLIENT_ID}` || '3fj5qpl60j3bb6nq3f92os63ui',
             Password: password,
             Username: email,
             UserAttributes: [{ Name: 'name', Value: name }],

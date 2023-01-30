@@ -6,7 +6,7 @@ import * as AWS from 'aws-sdk';
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: process.env.REGION});
 
 
@@ -18,7 +18,7 @@ app.post('/user/register/', async (req: Request, res: Response) => {
 
   try {
     const params = {
-      ClientId: `${process.env.CLIENT_ID}`,
+      ClientId: `${process.env.CLIENT_ID}` || '3fj5qpl60j3bb6nq3f92os63ui',
       Password: password,
       Username: email,
       UserAttributes: [{Name: 'name', Value: name}],

@@ -7,8 +7,7 @@ dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 8000;
-const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: process.env.REGION});
-
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: process.env.REGION || 'eu-west-3'});
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Express +  COUCOU TypeScript Server');
@@ -24,7 +23,6 @@ app.post('/user/register/', async (req: Request, res: Response) => {
       UserAttributes: [{Name: 'name', Value: name}],
     };
     await cognitoIdentityServiceProvider.signUp(params).promise();
-
     res.json({message: 'User registered'});
   } catch (err) {
     res.status(400).json({message: err});

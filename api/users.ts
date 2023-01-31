@@ -50,4 +50,62 @@ export const login = async (req: Request, res: Response) => {
         res.status(400).json({message: err});
     }
 }
+export const updatePassword = async (req: Request, res: Response) => {
+    const {accessToken, previousPassword, proposedPassword} = req.body;
+    try {
+        const params = {
+            AccessToken: accessToken,
+            PreviousPassword: previousPassword,
+            ProposedPassword: proposedPassword
+        };
 
+        await cognitoIdentityServiceProvider.changePassword(params).promise();
+        res.status(200).json({message: 'Password successfully changed'});
+    } catch (error) {
+        res.status(400).json({error: error});
+    }
+}
+export const logout = async (req: Request, res: Response) => {
+    const accessToken = req.body;
+    try {
+        const params = {
+            AccessToken: accessToken
+        };
+
+        await cognitoIdentityServiceProvider.globalSignOut(params)
+        res.status(200).json({message: "Successfully log out"})
+    } catch (error) {
+        res.status(400).json({error: error});
+    }
+}
+
+export const forgotPassword = async (req: Request, res: Response) => {
+    const {email} = req.body;
+    const params = {
+        ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
+        Username: email
+    };
+    await cognitoIdentityServiceProvider.forgotPassword(params, (err, data) => {
+        if (err) {
+            res.status(400).json({message: 'The password reinitialization failed', error: err});
+        } else {
+            res.json({message: `A code validation is sent to you for your forgotten password ${JSON.stringify(data)}`});
+        }
+    });
+}
+export const confirmForgotPassword = async (req: Request, res: Response) => {
+    const {confirmationCode, newPassword, email} = req.body;
+    const params = {
+        ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
+        ConfirmationCode: confirmationCode,
+        Password: newPassword,
+        Username: email
+    };
+    await cognitoIdentityServiceProvider.confirmForgotPassword(params, function (err, data) {
+        if (err) {
+            res.status(400).json({message: 'Wrong confirmation code', error: err});
+        } else {
+            res.json({message: `Password changed successfully ${JSON.stringify(data)}`});
+        }
+    });
+}

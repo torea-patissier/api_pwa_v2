@@ -15,7 +15,11 @@ app.get('/', (req: Request, res: Response) => {
 app.post('/user/register/', USER.register);
 app.post('/user/confirm/',USER.confirmRegister);
 app.post('/user/login/', USER.login);
+app.put('/user/change_password/', USER.updatePassword);
+app.post('/user/logout/',USER.logout);
+app.post('/user/forgot_password/',USER.forgotPassword);
+app.post('/user/confirm_forgot_password/',USER.confirmForgotPassword);
 
-app.listen(port, () => {
+    app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });

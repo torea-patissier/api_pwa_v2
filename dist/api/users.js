@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.confirmRegister = exports.register = void 0;
+exports.confirmForgotPassword = exports.forgotPassword = exports.logout = exports.updatePassword = exports.login = exports.confirmRegister = exports.register = void 0;
 const AWS = __importStar(require("aws-sdk"));
 const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: 'eu-west-3' });
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -87,3 +87,67 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.login = login;
+const updatePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { accessToken, previousPassword, proposedPassword } = req.body;
+    try {
+        const params = {
+            AccessToken: accessToken,
+            PreviousPassword: previousPassword,
+            ProposedPassword: proposedPassword
+        };
+        yield cognitoIdentityServiceProvider.changePassword(params).promise();
+        res.status(200).json({ message: 'Password successfully changed' });
+    }
+    catch (error) {
+        res.status(400).json({ error: error });
+    }
+});
+exports.updatePassword = updatePassword;
+const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const accessToken = req.body;
+    try {
+        const params = {
+            AccessToken: accessToken
+        };
+        yield cognitoIdentityServiceProvider.globalSignOut(params);
+        res.status(200).json({ message: "Successfully log out" });
+    }
+    catch (error) {
+        res.status(400).json({ error: error });
+    }
+});
+exports.logout = logout;
+const forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    const params = {
+        ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
+        Username: email
+    };
+    yield cognitoIdentityServiceProvider.forgotPassword(params, (err, data) => {
+        if (err) {
+            res.status(400).json({ message: 'The password reinitialization failed', error: err });
+        }
+        else {
+            res.json({ message: `A code validation is sent to you for your forgotten password ${JSON.stringify(data)}` });
+        }
+    });
+});
+exports.forgotPassword = forgotPassword;
+const confirmForgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { confirmationCode, newPassword, email } = req.body;
+    const params = {
+        ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
+        ConfirmationCode: confirmationCode,
+        Password: newPassword,
+        Username: email
+    };
+    yield cognitoIdentityServiceProvider.confirmForgotPassword(params, function (err, data) {
+        if (err) {
+            res.status(400).json({ message: 'Wrong confirmation code', error: err });
+        }
+        else {
+            res.json({ message: `Password changed successfully ${JSON.stringify(data)}` });
+        }
+    });
+});
+exports.confirmForgotPassword = confirmForgotPassword;

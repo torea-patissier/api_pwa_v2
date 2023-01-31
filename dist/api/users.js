@@ -32,17 +32,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerRoute = void 0;
+exports.login = exports.confirmRegister = exports.register = void 0;
 const AWS = __importStar(require("aws-sdk"));
 const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: 'eu-west-3' });
-const registerRoute = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password, name } = req.body;
+const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password, name, given_name } = req.body;
     try {
         const params = {
             ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
             Password: password,
             Username: email,
-            UserAttributes: [{ Name: 'name', Value: name }],
+            UserAttributes: [{ Name: 'name', Value: name }, { Name: 'given_name', Value: given_name }],
         };
         yield cognitoIdentityServiceProvider.signUp(params).promise();
         res.json({ message: 'User registered' });
@@ -51,4 +51,39 @@ const registerRoute = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(400).json({ message: err });
     }
 });
-exports.registerRoute = registerRoute;
+exports.register = register;
+const confirmRegister = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, confirmationCode } = req.body;
+    const params = {
+        ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
+        ConfirmationCode: confirmationCode,
+        Username: email,
+    };
+    try {
+        yield cognitoIdentityServiceProvider.confirmSignUp(params).promise();
+        res.json({ message: 'User confirmed' });
+    }
+    catch (err) {
+        res.status(400).json({ message: err });
+    }
+});
+exports.confirmRegister = confirmRegister;
+const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, password } = req.body;
+    try {
+        const params = {
+            AuthFlow: 'USER_PASSWORD_AUTH',
+            ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
+            AuthParameters: {
+                USERNAME: email,
+                PASSWORD: password,
+            },
+        };
+        const cognitoUser = yield cognitoIdentityServiceProvider.initiateAuth(params).promise();
+        res.json({ message: 'User logged in', cognitoUser });
+    }
+    catch (err) {
+        res.status(400).json({ message: err });
+    }
+});
+exports.login = login;

@@ -1,12 +1,12 @@
 import {Request, Response} from 'express';
 import * as AWS from 'aws-sdk';
 
-const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: `${process.env.REGION}`});
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: 'eu-west-3'});
 export const registerRoute = async (req: Request, res: Response) => {
     const {email, password, name} = req.body;
     try {
         const params = {
-            ClientId: `${process.env.CLIENT_ID}`,
+            ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
             Password: password,
             Username: email,
             UserAttributes: [{Name: 'name', Value: name}],

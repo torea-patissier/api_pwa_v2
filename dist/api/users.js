@@ -34,12 +34,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerRoute = void 0;
 const AWS = __importStar(require("aws-sdk"));
-const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: `${process.env.REGION}` });
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: 'eu-west-3' });
 const registerRoute = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, name } = req.body;
     try {
         const params = {
-            ClientId: `${process.env.CLIENT_ID}`,
+            ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
             Password: password,
             Username: email,
             UserAttributes: [{ Name: 'name', Value: name }],

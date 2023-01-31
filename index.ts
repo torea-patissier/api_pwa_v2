@@ -6,8 +6,9 @@ import * as AWS from 'aws-sdk';
 dotenv.config();
 
 const app: Express = express();
+app.use(express.json());
 const port = process.env.PORT || 8000;
-const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region: process.env.REGION || 'eu-west-3'});
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({region:'eu-west-3'});
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Ca marche! Mais que sur cette route...');
@@ -17,7 +18,7 @@ app.post('/user/register/', async (req: Request, res: Response) => {
 
   try {
     const params = {
-      ClientId: `${process.env.CLIENT_ID}` || '3fj5qpl60j3bb6nq3f92os63ui',
+      ClientId:'3fj5qpl60j3bb6nq3f92os63ui',
       Password: password,
       Username: email,
       UserAttributes: [{Name: 'name', Value: name}],

@@ -40,8 +40,9 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const AWS = __importStar(require("aws-sdk"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
 const port = process.env.PORT || 8000;
-const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: process.env.REGION || 'eu-west-3' });
+const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({ region: 'eu-west-3' });
 app.get('/', (req, res) => {
     res.send('Ca marche! Mais que sur cette route...');
 });
@@ -49,7 +50,7 @@ app.post('/user/register/', (req, res) => __awaiter(void 0, void 0, void 0, func
     const { email, password, name } = req.body;
     try {
         const params = {
-            ClientId: `${process.env.CLIENT_ID}` || '3fj5qpl60j3bb6nq3f92os63ui',
+            ClientId: '3fj5qpl60j3bb6nq3f92os63ui',
             Password: password,
             Username: email,
             UserAttributes: [{ Name: 'name', Value: name }],

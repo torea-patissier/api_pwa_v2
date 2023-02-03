@@ -44,10 +44,10 @@ export const createPost = async (req: Request, res: Response) => {
 export const updatePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { htmlContent } = req.body;
+    const { htmlContent, userId } = req.body;
     const post = await prisma.post.update({
       where: { id: Number(id) },
-      data: { htmlContent: htmlContent },
+      data: { htmlContent: htmlContent, userId: Number(userId) },
     });
     res.json(post);
   } catch (error: any) {

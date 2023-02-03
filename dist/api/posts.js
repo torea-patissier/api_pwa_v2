@@ -9,70 +9,69 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getUsers = void 0;
+exports.deletePost = exports.updatePost = exports.createPost = exports.getPostById = exports.getPosts = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
-const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield prisma.user.findMany({
+        const posts = yield prisma.post.findMany({
             orderBy: {
                 updatedAt: "desc",
             },
         });
-        res.json(users);
+        res.json(posts);
     }
     catch (error) {
         res.status(400).send({ error: "Bad Request" });
     }
 });
-exports.getUsers = getUsers;
-const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getPosts = getPosts;
+const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const user = yield prisma.user.findUnique({ where: { id: Number(id) } });
-        res.json(user);
+        const post = yield prisma.post.findUnique({ where: { id: Number(id) } });
+        res.json(post);
     }
     catch (error) {
         res.status(400).send({ error: "Bad Request" });
     }
 });
-exports.getUserById = getUserById;
-const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getPostById = getPostById;
+const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { firstname, lastname, email } = req.body;
-        const user = yield prisma.user.create({
+        const { htmlContent, userId } = req.body;
+        const post = yield prisma.post.create({
             data: {
-                firstname: firstname,
-                lastname: lastname,
-                email: email,
+                htmlContent: htmlContent,
+                userId: Number(userId),
             },
         });
-        res.status(201).json(user);
+        res.status(201).json(post);
     }
     catch (error) {
         res.status(400).send({ error: "Bad Request" });
     }
 });
-exports.createUser = createUser;
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.createPost = createPost;
+const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const { firstname, lastname, email } = req.body;
-        const user = yield prisma.user.update({
+        const { htmlContent } = req.body;
+        const post = yield prisma.post.update({
             where: { id: Number(id) },
-            data: { firstname: firstname, lastname: lastname, email: email },
+            data: { htmlContent: htmlContent },
         });
-        res.json(user);
+        res.json(post);
     }
     catch (error) {
         res.status(400).send({ error: "Bad Request" });
     }
 });
-exports.updateUser = updateUser;
-const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.updatePost = updatePost;
+const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const user = yield prisma.user.delete({
+        const post = yield prisma.post.delete({
             where: { id: Number(id) },
         });
         res.status(204).send();
@@ -81,4 +80,4 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(400).send({ error: "Bad Request" });
     }
 });
-exports.deleteUser = deleteUser;
+exports.deletePost = deletePost;

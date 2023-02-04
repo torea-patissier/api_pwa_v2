@@ -22,7 +22,7 @@ const getNotifications = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.json(notifications);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getNotifications = getNotifications;
@@ -32,16 +32,25 @@ const getNotificationById = (req, res) => __awaiter(void 0, void 0, void 0, func
         const notification = yield prisma.notification.findUnique({
             where: { id: Number(id) },
         });
+        if (!notification) {
+            return res.status(404).send({ error: "Notification not found" });
+        }
         res.json(notification);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getNotificationById = getNotificationById;
 const createNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { read, friendshipId, conversationMessageId } = req.body;
+    if (!read) {
+        return res.status(400).send({ error: "read is required" });
+    }
+    else if (!friendshipId) {
+        return res.status(400).send({ error: "friendshipId is required" });
+    }
     try {
-        const { read, friendshipId, conversationMessageId } = req.body;
         const notification = yield prisma.notification.create({
             data: {
                 read: read,
@@ -52,35 +61,63 @@ const createNotification = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(201).json(notification);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.createNotification = createNotification;
 const updateNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { read, friendshipId, conversationMessageId } = req.body;
+    if (!read) {
+        return res.status(400).send({ error: "read is required" });
+    }
+    else if (!friendshipId) {
+        return res.status(400).send({ error: "friendshipId is required" });
+    }
     try {
-        const { id } = req.params;
-        const { read } = req.body;
-        const notification = yield prisma.notification.update({
+        const notification = yield prisma.notification.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+        if (!notification) {
+            return res.status(404).send({ error: "Notification not found" });
+        }
+        yield prisma.notification.update({
             where: { id: Number(id) },
-            data: { read: read },
+            data: {
+                read: read,
+                friendshipId: friendshipId,
+                conversationMessageId: conversationMessageId,
+            },
         });
         res.json(notification);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.updateNotification = updateNotification;
 const deleteNotification = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const notification = yield prisma.notification.delete({
-            where: { id: Number(id) },
+        const notification = yield prisma.notification.findUnique({
+            where: {
+                id: Number(id),
+            },
         });
-        res.status(204).send();
+        if (!notification) {
+            return res.status(404).send({ error: "Notification not found" });
+        }
+        yield prisma.notification.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+        res.send({ message: "Notification deleted successfully" });
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.deleteNotification = deleteNotification;

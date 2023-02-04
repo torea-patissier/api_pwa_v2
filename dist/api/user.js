@@ -22,7 +22,7 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(users);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getUsers = getUsers;
@@ -30,16 +30,28 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const { id } = req.params;
     try {
         const user = yield prisma.user.findUnique({ where: { id: Number(id) } });
+        if (!user) {
+            return res.status(404).send({ error: "User not found" });
+        }
         res.json(user);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getUserById = getUserById;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { firstname, lastname, email } = req.body;
+    if (!firstname) {
+        return res.status(400).send({ error: "firstname is required" });
+    }
+    else if (!lastname) {
+        return res.status(400).send({ error: "lastname is required" });
+    }
+    else if (!email) {
+        return res.status(400).send({ error: "email is required" });
+    }
     try {
-        const { firstname, lastname, email } = req.body;
         const user = yield prisma.user.create({
             data: {
                 firstname: firstname,
@@ -50,35 +62,62 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(201).json(user);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.createUser = createUser;
 const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { firstname, lastname, email } = req.body;
+    if (!firstname) {
+        return res.status(400).send({ error: "firstname is required" });
+    }
+    else if (!lastname) {
+        return res.status(400).send({ error: "lastname is required" });
+    }
+    else if (!email) {
+        return res.status(400).send({ error: "email is required" });
+    }
     try {
-        const { id } = req.params;
-        const { firstname, lastname, email } = req.body;
-        const user = yield prisma.user.update({
+        const user = yield prisma.user.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+        if (!user) {
+            return res.status(404).send({ error: "User not found" });
+        }
+        yield prisma.user.update({
             where: { id: Number(id) },
             data: { firstname: firstname, lastname: lastname, email: email },
         });
         res.json(user);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.updateUser = updateUser;
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const user = yield prisma.user.delete({
-            where: { id: Number(id) },
+        const user = yield prisma.user.findUnique({
+            where: {
+                id: Number(id),
+            },
         });
-        res.status(204).send();
+        if (!user) {
+            return res.status(404).send({ error: "User not found" });
+        }
+        yield prisma.user.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+        res.send({ message: "User deleted successfully" });
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.deleteUser = deleteUser;

@@ -22,62 +22,100 @@ const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(posts);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getPosts = getPosts;
 const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const post = yield prisma.post.findUnique({ where: { id: Number(id) } });
+        const post = yield prisma.post.findUnique({
+            where: { id: Number(id) },
+        });
+        if (!post) {
+            return res.status(404).send({ error: "Post not found" });
+        }
         res.json(post);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getPostById = getPostById;
 const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { htmlContent, userId } = req.body;
+    if (!htmlContent) {
+        return res.status(400).send({ error: "htmlContent is required" });
+    }
+    else if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
     try {
-        const { htmlContent, userId } = req.body;
         const post = yield prisma.post.create({
             data: {
                 htmlContent: htmlContent,
-                userId: Number(userId),
+                userId: userId,
             },
         });
         res.status(201).json(post);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.createPost = createPost;
 const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { htmlContent, userId } = req.body;
+    if (!htmlContent) {
+        return res.status(400).send({ error: "htmlContent is required" });
+    }
+    else if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
     try {
-        const { id } = req.params;
-        const { htmlContent, userId } = req.body;
-        const post = yield prisma.post.update({
+        const post = yield prisma.post.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+        if (!post) {
+            return res.status(404).send({ error: "Post not found" });
+        }
+        yield prisma.post.update({
             where: { id: Number(id) },
-            data: { htmlContent: htmlContent, userId: Number(userId) },
+            data: {
+                htmlContent: htmlContent,
+                userId: userId,
+            },
         });
         res.json(post);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.updatePost = updatePost;
 const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const post = yield prisma.post.delete({
-            where: { id: Number(id) },
+        const post = yield prisma.post.findUnique({
+            where: {
+                id: Number(id),
+            },
         });
-        res.status(204).send();
+        if (!post) {
+            return res.status(404).send({ error: "Post not found" });
+        }
+        yield prisma.post.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+        res.send({ message: "Post deleted successfully" });
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.deletePost = deletePost;

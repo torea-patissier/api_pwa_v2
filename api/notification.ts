@@ -12,7 +12,7 @@ export const getNotifications = async (req: Request, res: Response) => {
     });
     res.json(notifications);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
@@ -22,15 +22,23 @@ export const getNotificationById = async (req: Request, res: Response) => {
     const notification = await prisma.notification.findUnique({
       where: { id: Number(id) },
     });
+    if (!notification) {
+      return res.status(404).send({ error: "Notification not found" });
+    }
     res.json(notification);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
 export const createNotification = async (req: Request, res: Response) => {
+  const { read, friendshipId, conversationMessageId } = req.body;
+  if (!read) {
+    return res.status(400).send({ error: "read is required" });
+  } else if (!friendshipId) {
+    return res.status(400).send({ error: "friendshipId is required" });
+  }
   try {
-    const { read, friendshipId, conversationMessageId } = req.body;
     const notification = await prisma.notification.create({
       data: {
         read: read,
@@ -40,32 +48,59 @@ export const createNotification = async (req: Request, res: Response) => {
     });
     res.status(201).json(notification);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
 export const updateNotification = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { read, friendshipId, conversationMessageId } = req.body;
+  if (!read) {
+    return res.status(400).send({ error: "read is required" });
+  } else if (!friendshipId) {
+    return res.status(400).send({ error: "friendshipId is required" });
+  }
   try {
-    const { id } = req.params;
-    const { read } = req.body;
-    const notification = await prisma.notification.update({
+    const notification = await prisma.notification.findUnique({
+      where: {
+        id: Number(id),
+      },
+    });
+    if (!notification) {
+      return res.status(404).send({ error: "Notification not found" });
+    }
+    await prisma.notification.update({
       where: { id: Number(id) },
-      data: { read: read },
+      data: {
+        read: read,
+        friendshipId: friendshipId,
+        conversationMessageId: conversationMessageId,
+      },
     });
     res.json(notification);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
 export const deleteNotification = async (req: Request, res: Response) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const notification = await prisma.notification.delete({
-      where: { id: Number(id) },
+    const notification = await prisma.notification.findUnique({
+      where: {
+        id: Number(id),
+      },
     });
-    res.status(204).send();
+    if (!notification) {
+      return res.status(404).send({ error: "Notification not found" });
+    }
+    await prisma.notification.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+    res.send({ message: "Notification deleted successfully" });
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };

@@ -18,7 +18,7 @@ const getPostAttachments = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.json(postAttachments);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getPostAttachments = getPostAttachments;
@@ -28,16 +28,28 @@ const getPostAttachmentById = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const postAttachment = yield prisma.postAttachment.findUnique({
             where: { id: Number(id) },
         });
+        if (!postAttachment) {
+            return res.status(404).send({ error: "PostAttachment not found" });
+        }
         res.json(postAttachment);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getPostAttachmentById = getPostAttachmentById;
 const createPostAttachment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { type, s3Key, postId } = req.body;
+    if (!type) {
+        return res.status(400).send({ error: "type is required" });
+    }
+    else if (!s3Key) {
+        return res.status(400).send({ error: "s3Key is required" });
+    }
+    else if (!postId) {
+        return res.status(400).send({ error: "postId is required" });
+    }
     try {
-        const { type, s3Key, postId } = req.body;
         const postAttachment = yield prisma.postAttachment.create({
             data: {
                 type: type,
@@ -48,35 +60,66 @@ const createPostAttachment = (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.status(201).json(postAttachment);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.createPostAttachment = createPostAttachment;
 const updatePostAttachment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { type, s3Key, postId } = req.body;
+    if (!type) {
+        return res.status(400).send({ error: "type is required" });
+    }
+    else if (!s3Key) {
+        return res.status(400).send({ error: "s3Key is required" });
+    }
+    else if (!postId) {
+        return res.status(400).send({ error: "postId is required" });
+    }
     try {
-        const { id } = req.params;
-        const { type, s3Key, postId } = req.body;
-        const postAttachment = yield prisma.postAttachment.update({
+        const postAttachment = yield prisma.postAttachment.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+        if (!postAttachment) {
+            return res.status(404).send({ error: "PostAttachment not found" });
+        }
+        yield prisma.postAttachment.update({
             where: { id: Number(id) },
-            data: { type: type, s3Key: s3Key, postId: postId },
+            data: {
+                type: type,
+                s3Key: s3Key,
+                postId: postId,
+            },
         });
         res.json(postAttachment);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.updatePostAttachment = updatePostAttachment;
 const deletePostAttachment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const postAttachment = yield prisma.postAttachment.delete({
-            where: { id: Number(id) },
+        const postAttachment = yield prisma.postAttachment.findUnique({
+            where: {
+                id: Number(id),
+            },
         });
-        res.status(204).send();
+        if (!postAttachment) {
+            return res.status(404).send({ error: "PostAttachment not found" });
+        }
+        yield prisma.postAttachment.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+        res.send({ message: "PostAttachment deleted successfully" });
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.deletePostAttachment = deletePostAttachment;

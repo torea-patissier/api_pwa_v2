@@ -22,26 +22,33 @@ const getConversations = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.json(conversations);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getConversations = getConversations;
 const getConversationById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const conversation = yield prisma.conversation.findUnique({
-            where: { id: Number(id) },
-        });
+        const conversation = yield prisma.conversation.findUnique({ where: { id: Number(id) } });
+        if (!conversation) {
+            return res.status(404).send({ error: "Conversation not found" });
+        }
         res.json(conversation);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.getConversationById = getConversationById;
 const createConversation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { fromId, toId } = req.body;
+    if (!fromId) {
+        return res.status(400).send({ error: "fromId is required" });
+    }
+    else if (!toId) {
+        return res.status(400).send({ error: "toId is required" });
+    }
     try {
-        const { fromId, toId } = req.body;
         const conversation = yield prisma.conversation.create({
             data: {
                 fromId: fromId,
@@ -51,35 +58,59 @@ const createConversation = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(201).json(conversation);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.createConversation = createConversation;
 const updateConversation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { fromId, toId } = req.body;
+    if (!fromId) {
+        return res.status(400).send({ error: "fromId is required" });
+    }
+    else if (!toId) {
+        return res.status(400).send({ error: "toId is required" });
+    }
     try {
-        const { id } = req.params;
-        const { fromId, toId } = req.body;
-        const conversation = yield prisma.conversation.update({
+        const conversation = yield prisma.conversation.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+        if (!conversation) {
+            return res.status(404).send({ error: "Conversation not found" });
+        }
+        yield prisma.conversation.update({
             where: { id: Number(id) },
             data: { fromId: fromId, toId: toId },
         });
         res.json(conversation);
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.updateConversation = updateConversation;
 const deleteConversation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
     try {
-        const { id } = req.params;
-        const conversation = yield prisma.conversation.delete({
-            where: { id: Number(id) },
+        const conversation = yield prisma.conversation.findUnique({
+            where: {
+                id: Number(id),
+            },
         });
-        res.status(204).send();
+        if (!conversation) {
+            return res.status(404).send({ error: "Conversation not found" });
+        }
+        yield prisma.conversation.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+        res.send({ message: "Conversation deleted successfully" });
     }
     catch (error) {
-        res.status(400).send({ error: "Bad Request" });
+        res.status(500).send({ error: error.message });
     }
 });
 exports.deleteConversation = deleteConversation;

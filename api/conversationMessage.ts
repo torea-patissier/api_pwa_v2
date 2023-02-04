@@ -12,76 +12,95 @@ export const getConversationMessages = async (req: Request, res: Response) => {
     });
     res.json(conversationMessages);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
-export const getConversationMessageById = async (
-  req: Request,
-  res: Response
-) => {
+export const getConversationMessageById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const conversationMessage = await prisma.conversationMessage.findUnique({
-      where: { id: Number(id) },
-    });
+    const conversationMessage = await prisma.conversationMessage.findUnique({ where: { id: Number(id) } });
+    if (!conversationMessage) {
+      return res.status(404).send({ error: "ConversationMessage not found" });
+    }
     res.json(conversationMessage);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
-export const createConversationMessage = async (
-  req: Request,
-  res: Response
-) => {
+export const createConversationMessage = async (req: Request, res: Response) => {
+  const { conversationId, userId, content } = req.body;
+  if (!conversationId) {
+    return res.status(400).send({ error: "conversationId is required" });
+  } else if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  } else if (!content) {
+    return res.status(400).send({ error: "content is required" });
+  }
   try {
-    const { conversationId, userId, content } = req.body;
     const conversationMessage = await prisma.conversationMessage.create({
       data: {
         conversationId: conversationId,
-        userId: userId,
-        content: content,
+        userId:  userId,
+        content:  content,
       },
     });
     res.status(201).json(conversationMessage);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
-export const updateConversationMessage = async (
-  req: Request,
-  res: Response
-) => {
+export const updateConversationMessage = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { conversationId, userId, content } = req.body;
+  if (!conversationId) {
+    return res.status(400).send({ error: "conversationId is required" });
+  } else if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  } else if (!content) {
+    return res.status(400).send({ error: "content is required" });
+  }
   try {
-    const { id } = req.params;
-    const { conversationId, userId, content } = req.body;
-    const conversationMessage = await prisma.conversationMessage.update({
-      where: { id: Number(id) },
-      data: {
-        conversationId: conversationId,
-        userId: userId,
-        content: content,
+    const conversationMessage = await prisma.conversationMessage.findUnique({
+      where: {
+        id: Number(id),
       },
+    });
+    if (!conversationMessage) {
+      return res.status(404).send({ error: "ConversationMessage not found" });
+    }
+    await prisma.conversationMessage.update({
+      where: { id: Number(id) },
+      data: { conversationId: conversationId,
+        userId:  userId,
+        content:  content,},
     });
     res.json(conversationMessage);
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };
 
-export const deleteConversationMessage = async (
-  req: Request,
-  res: Response
-) => {
+export const deleteConversationMessage = async (req: Request, res: Response) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const conversationMessage = await prisma.conversationMessage.delete({
-      where: { id: Number(id) },
+    const conversationMessage = await prisma.conversationMessage.findUnique({
+      where: {
+        id: Number(id),
+      },
     });
-    res.status(204).send();
+    if (!conversationMessage) {
+      return res.status(404).send({ error: "ConversationMessage not found" });
+    }
+    await prisma.conversationMessage.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+    res.send({ message: "ConversationMessage deleted successfully" });
   } catch (error: any) {
-    res.status(400).send({ error: "Bad Request" });
+    res.status(500).send({ error: error.message });
   }
 };

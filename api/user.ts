@@ -29,8 +29,21 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+export const getUserByEmail = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  try {
+    const user = await prisma.user.findUnique({ where: { email: email } });
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+    res.json(user);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createUser = async (req: Request, res: Response) => {
-  const { firstname, lastname, email } = req.body;
+  const { firstname, lastname, email, config } = req.body;
   if (!firstname) {
     return res.status(400).send({ error: "firstname is required" });
   } else if (!lastname) {
@@ -44,6 +57,7 @@ export const createUser = async (req: Request, res: Response) => {
         firstname: firstname,
         lastname: lastname,
         email: email,
+        config: config,
       },
     });
     res.status(201).json(user);
@@ -54,14 +68,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { firstname, lastname, email } = req.body;
-  if (!firstname) {
-    return res.status(400).send({ error: "firstname is required" });
-  } else if (!lastname) {
-    return res.status(400).send({ error: "lastname is required" });
-  } else if (!email) {
-    return res.status(400).send({ error: "email is required" });
-  }
+  const { firstname, lastname, email, config } = req.body;
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -73,7 +80,12 @@ export const updateUser = async (req: Request, res: Response) => {
     }
     await prisma.user.update({
       where: { id: Number(id) },
-      data: { firstname: firstname, lastname: lastname, email: email },
+      data: {
+        firstname: firstname,
+        lastname: lastname,
+        email: email,
+        config: config,
+      },
     });
     res.json(user);
   } catch (error: any) {

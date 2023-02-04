@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserById = exports.getUsers = void 0;
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserByEmail = exports.getUserById = exports.getUsers = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -40,8 +40,22 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserById = getUserById;
+const getUserByEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    try {
+        const user = yield prisma.user.findUnique({ where: { email: email } });
+        if (!user) {
+            return res.status(404).send({ error: "User not found" });
+        }
+        res.json(user);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getUserByEmail = getUserByEmail;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { firstname, lastname, email } = req.body;
+    const { firstname, lastname, email, config } = req.body;
     if (!firstname) {
         return res.status(400).send({ error: "firstname is required" });
     }
@@ -57,6 +71,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 firstname: firstname,
                 lastname: lastname,
                 email: email,
+                config: config,
             },
         });
         res.status(201).json(user);
@@ -68,16 +83,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.createUser = createUser;
 const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { firstname, lastname, email } = req.body;
-    if (!firstname) {
-        return res.status(400).send({ error: "firstname is required" });
-    }
-    else if (!lastname) {
-        return res.status(400).send({ error: "lastname is required" });
-    }
-    else if (!email) {
-        return res.status(400).send({ error: "email is required" });
-    }
+    const { firstname, lastname, email, config } = req.body;
     try {
         const user = yield prisma.user.findUnique({
             where: {
@@ -89,7 +95,12 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         yield prisma.user.update({
             where: { id: Number(id) },
-            data: { firstname: firstname, lastname: lastname, email: email },
+            data: {
+                firstname: firstname,
+                lastname: lastname,
+                email: email,
+                config: config,
+            },
         });
         res.json(user);
     }

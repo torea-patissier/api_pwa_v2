@@ -122,6 +122,7 @@ app
     .delete(POST_LIKE.deletePostLike);
 // USER
 app.route("/user").get(USER.getUsers).post(USER.createUser);
+app.post("/userByEmail", USER.getUserByEmail);
 app
     .route("/user/:id")
     .get(USER.getUserById)

@@ -85,7 +85,7 @@ const updatePostAttachment = (req, res) => __awaiter(void 0, void 0, void 0, fun
         if (!postAttachment) {
             return res.status(404).send({ error: "PostAttachment not found" });
         }
-        yield prisma.postAttachment.update({
+        const newPostAttachment = yield prisma.postAttachment.update({
             where: { id: Number(id) },
             data: {
                 type: type,
@@ -93,7 +93,7 @@ const updatePostAttachment = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 postId: postId,
             },
         });
-        res.json(postAttachment);
+        res.json(newPostAttachment);
     }
     catch (error) {
         res.status(500).send({ error: error.message });

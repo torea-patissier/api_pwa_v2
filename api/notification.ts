@@ -69,7 +69,7 @@ export const updateNotification = async (req: Request, res: Response) => {
     if (!notification) {
       return res.status(404).send({ error: "Notification not found" });
     }
-    await prisma.notification.update({
+    const newNotification = await prisma.notification.update({
       where: { id: Number(id) },
       data: {
         read: read,
@@ -77,7 +77,7 @@ export const updateNotification = async (req: Request, res: Response) => {
         conversationMessageId: conversationMessageId,
       },
     });
-    res.json(notification);
+    res.json(newNotification);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

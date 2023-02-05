@@ -19,7 +19,9 @@ export const getFriendships = async (req: Request, res: Response) => {
 export const getFriendshipById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const friendship = await prisma.friendship.findUnique({ where: { id: Number(id) } });
+    const friendship = await prisma.friendship.findUnique({
+      where: { id: Number(id) },
+    });
     if (!friendship) {
       return res.status(404).send({ error: "Friendship not found" });
     }
@@ -42,8 +44,8 @@ export const createFriendship = async (req: Request, res: Response) => {
     const friendship = await prisma.friendship.create({
       data: {
         status: status,
-        fromId:  fromId,
-        toId:  toId,
+        fromId: fromId,
+        toId: toId,
       },
     });
     res.status(201).json(friendship);
@@ -71,13 +73,11 @@ export const updateFriendship = async (req: Request, res: Response) => {
     if (!friendship) {
       return res.status(404).send({ error: "Friendship not found" });
     }
-    await prisma.friendship.update({
+    const newFriendship = await prisma.friendship.update({
       where: { id: Number(id) },
-      data: { status: status,
-        fromId:  fromId,
-        toId:  toId,},
+      data: { status: status, fromId: fromId, toId: toId },
     });
-    res.json(friendship);
+    res.json(newFriendship);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

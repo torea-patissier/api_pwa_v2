@@ -93,7 +93,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (!user) {
             return res.status(404).send({ error: "User not found" });
         }
-        yield prisma.user.update({
+        const newUser = yield prisma.user.update({
             where: { id: Number(id) },
             data: {
                 firstname: firstname,
@@ -102,7 +102,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 config: config,
             },
         });
-        res.json(user);
+        res.json(newUser);
     }
     catch (error) {
         res.status(500).send({ error: error.message });

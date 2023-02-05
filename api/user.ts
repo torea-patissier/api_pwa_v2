@@ -78,7 +78,7 @@ export const updateUser = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).send({ error: "User not found" });
     }
-    await prisma.user.update({
+    const newUser = await prisma.user.update({
       where: { id: Number(id) },
       data: {
         firstname: firstname,
@@ -87,7 +87,7 @@ export const updateUser = async (req: Request, res: Response) => {
         config: config,
       },
     });
-    res.json(user);
+    res.json(newUser);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePost = exports.updatePost = exports.createPost = exports.getPostById = exports.getPosts = void 0;
+exports.deletePost = exports.updatePost = exports.createPost = exports.getPostsByUser = exports.getPostById = exports.getPosts = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,6 +42,22 @@ const getPostById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getPostById = getPostById;
+const getPostsByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
+    try {
+        const posts = yield prisma.post.findMany({
+            where: { userId: Number(userId) },
+        });
+        res.json(posts);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getPostsByUser = getPostsByUser;
 const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { htmlContent, userId } = req.body;
     if (!htmlContent) {
@@ -82,14 +98,14 @@ const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (!post) {
             return res.status(404).send({ error: "Post not found" });
         }
-        yield prisma.post.update({
+        const newPost = yield prisma.post.update({
             where: { id: Number(id) },
             data: {
                 htmlContent: htmlContent,
                 userId: userId,
             },
         });
-        res.json(post);
+        res.json(newPost);
     }
     catch (error) {
         res.status(500).send({ error: error.message });
@@ -107,6 +123,22 @@ const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (!post) {
             return res.status(404).send({ error: "Post not found" });
         }
+        // Delete foreign keys
+        yield prisma.postLike.deleteMany({
+            where: {
+                postId: post.id,
+            },
+        });
+        yield prisma.postComment.deleteMany({
+            where: {
+                postId: post.id,
+            },
+        });
+        yield prisma.postAttachment.deleteMany({
+            where: {
+                postId: post.id,
+            },
+        });
         yield prisma.post.delete({
             where: {
                 id: Number(id),

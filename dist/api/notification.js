@@ -83,7 +83,7 @@ const updateNotification = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!notification) {
             return res.status(404).send({ error: "Notification not found" });
         }
-        yield prisma.notification.update({
+        const newNotification = yield prisma.notification.update({
             where: { id: Number(id) },
             data: {
                 read: read,
@@ -91,7 +91,7 @@ const updateNotification = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 conversationMessageId: conversationMessageId,
             },
         });
-        res.json(notification);
+        res.json(newNotification);
     }
     catch (error) {
         res.status(500).send({ error: error.message });

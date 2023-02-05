@@ -29,7 +29,9 @@ exports.getConversationMessages = getConversationMessages;
 const getConversationMessageById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const conversationMessage = yield prisma.conversationMessage.findUnique({ where: { id: Number(id) } });
+        const conversationMessage = yield prisma.conversationMessage.findUnique({
+            where: { id: Number(id) },
+        });
         if (!conversationMessage) {
             return res.status(404).send({ error: "ConversationMessage not found" });
         }
@@ -87,13 +89,15 @@ const updateConversationMessage = (req, res) => __awaiter(void 0, void 0, void 0
         if (!conversationMessage) {
             return res.status(404).send({ error: "ConversationMessage not found" });
         }
-        yield prisma.conversationMessage.update({
+        const newConversationMessage = yield prisma.conversationMessage.update({
             where: { id: Number(id) },
-            data: { conversationId: conversationId,
+            data: {
+                conversationId: conversationId,
                 userId: userId,
-                content: content, },
+                content: content,
+            },
         });
-        res.json(conversationMessage);
+        res.json(newConversationMessage);
     }
     catch (error) {
         res.status(500).send({ error: error.message });

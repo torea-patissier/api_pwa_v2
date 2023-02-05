@@ -31,6 +31,21 @@ export const getPostById = async (req: Request, res: Response) => {
   }
 };
 
+export const getPostsByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  try {
+    const posts = await prisma.post.findMany({
+      where: { userId: Number(userId) },
+    });
+    res.json(posts);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createPost = async (req: Request, res: Response) => {
   const { htmlContent, userId } = req.body;
   if (!htmlContent) {
@@ -68,14 +83,14 @@ export const updatePost = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).send({ error: "Post not found" });
     }
-    await prisma.post.update({
+    const newPost = await prisma.post.update({
       where: { id: Number(id) },
       data: {
         htmlContent: htmlContent,
         userId: userId,
       },
     });
-    res.json(post);
+    res.json(newPost);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
@@ -92,6 +107,23 @@ export const deletePost = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).send({ error: "Post not found" });
     }
+    // Delete foreign keys
+    await prisma.postLike.deleteMany({
+      where: {
+        postId: post.id,
+      },
+    });
+    await prisma.postComment.deleteMany({
+      where: {
+        postId: post.id,
+      },
+    });
+    await prisma.postAttachment.deleteMany({
+      where: {
+        postId: post.id,
+      },
+    });
+
     await prisma.post.delete({
       where: {
         id: Number(id),

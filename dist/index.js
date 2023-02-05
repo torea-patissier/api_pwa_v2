@@ -35,6 +35,7 @@ const FRIENDSHIP = __importStar(require("./api/friendship"));
 const NOTIFICATION = __importStar(require("./api/notification"));
 const POST = __importStar(require("./api/post"));
 const POST_ATTACHMENT = __importStar(require("./api/postAttachment"));
+const POST_COMMENT = __importStar(require("./api/postComment"));
 const POST_LIKE = __importStar(require("./api/postLike"));
 const USER = __importStar(require("./api/user"));
 dotenv_1.default.config();
@@ -100,6 +101,7 @@ app
     .get(POST.getPostById)
     .put(POST.updatePost)
     .delete(POST.deletePost);
+app.post("/postsByUser", POST.getPostsByUser);
 // POST_ATTACHMENT
 app
     .route("/postAttachment")
@@ -110,6 +112,16 @@ app
     .get(POST_ATTACHMENT.getPostAttachmentById)
     .put(POST_ATTACHMENT.updatePostAttachment)
     .delete(POST_ATTACHMENT.deletePostAttachment);
+// POST_COMMENT
+app
+    .route("/postComment")
+    .get(POST_COMMENT.getPostComments)
+    .post(POST_COMMENT.createPostComment);
+app
+    .route("/postComment/:id")
+    .get(POST_COMMENT.getPostCommentById)
+    .put(POST_COMMENT.updatePostComment)
+    .delete(POST_COMMENT.deletePostComment);
 // POST_LIKE
 app
     .route("/postLike")

@@ -68,14 +68,14 @@ export const updatePostLike = async (req: Request, res: Response) => {
     if (!postLike) {
       return res.status(404).send({ error: "PostLike not found" });
     }
-    await prisma.postLike.update({
+    const newPostLike = await prisma.postLike.update({
       where: { id: Number(id) },
       data: {
         userId: userId,
         postId: postId,
       },
     });
-    res.json(postLike);
+    res.json(newPostLike);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

@@ -7,6 +7,7 @@ import * as FRIENDSHIP from "./api/friendship";
 import * as NOTIFICATION from "./api/notification";
 import * as POST from "./api/post";
 import * as POST_ATTACHMENT from "./api/postAttachment";
+import * as POST_COMMENT from "./api/postComment";
 import * as POST_LIKE from "./api/postLike";
 import * as USER from "./api/user";
 
@@ -80,6 +81,7 @@ app
   .get(POST.getPostById)
   .put(POST.updatePost)
   .delete(POST.deletePost);
+app.post("/postsByUser", POST.getPostsByUser);
 
 // POST_ATTACHMENT
 app
@@ -91,6 +93,17 @@ app
   .get(POST_ATTACHMENT.getPostAttachmentById)
   .put(POST_ATTACHMENT.updatePostAttachment)
   .delete(POST_ATTACHMENT.deletePostAttachment);
+
+// POST_COMMENT
+app
+  .route("/postComment")
+  .get(POST_COMMENT.getPostComments)
+  .post(POST_COMMENT.createPostComment);
+app
+  .route("/postComment/:id")
+  .get(POST_COMMENT.getPostCommentById)
+  .put(POST_COMMENT.updatePostComment)
+  .delete(POST_COMMENT.deletePostComment);
 
 // POST_LIKE
 app

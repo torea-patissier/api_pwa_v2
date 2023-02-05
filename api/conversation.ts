@@ -19,7 +19,9 @@ export const getConversations = async (req: Request, res: Response) => {
 export const getConversationById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const conversation = await prisma.conversation.findUnique({ where: { id: Number(id) } });
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: Number(id) },
+    });
     if (!conversation) {
       return res.status(404).send({ error: "Conversation not found" });
     }
@@ -66,11 +68,11 @@ export const updateConversation = async (req: Request, res: Response) => {
     if (!conversation) {
       return res.status(404).send({ error: "Conversation not found" });
     }
-    await prisma.conversation.update({
+    const newConversation = await prisma.conversation.update({
       where: { id: Number(id) },
       data: { fromId: fromId, toId: toId },
     });
-    res.json(conversation);
+    res.json(newConversation);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

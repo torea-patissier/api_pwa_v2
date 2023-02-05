@@ -31,6 +31,36 @@ export const getPostLikeById = async (req: Request, res: Response) => {
   }
 };
 
+export const getPostLikesByPost = async (req: Request, res: Response) => {
+  const { postId } = req.body;
+  if (!postId) {
+    return res.status(400).send({ error: "postId is required" });
+  } 
+  try {
+    const postLike = await prisma.postLike.findMany({
+      where: { postId: Number(postId) },
+    });
+    res.json(postLike);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const getPostLikesByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  } 
+  try {
+    const postLike = await prisma.postLike.findMany({
+      where: { userId: Number(userId) },
+    });
+    res.json(postLike);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createPostLike = async (req: Request, res: Response) => {
   const { userId, postId } = req.body;
   if (!userId) {

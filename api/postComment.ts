@@ -31,6 +31,36 @@ export const getPostCommentById = async (req: Request, res: Response) => {
   }
 };
 
+export const getPostCommentsByPost = async (req: Request, res: Response) => {
+  const { postId } = req.body;
+  if (!postId) {
+    return res.status(400).send({ error: "postId is required" });
+  } 
+  try {
+    const postComment = await prisma.postComment.findMany({
+      where: { postId: Number(postId) },
+    });
+    res.json(postComment);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const getPostCommentsByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  } 
+  try {
+    const postComment = await prisma.postComment.findMany({
+      where: { userId: Number(userId) },
+    });
+    res.json(postComment);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createPostComment = async (req: Request, res: Response) => {
   const { userId, postId, text } = req.body;
   if (!userId) {

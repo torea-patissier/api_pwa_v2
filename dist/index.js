@@ -122,6 +122,8 @@ app
     .get(POST_COMMENT.getPostCommentById)
     .put(POST_COMMENT.updatePostComment)
     .delete(POST_COMMENT.deletePostComment);
+app.post("/postCommentsByUser", POST_COMMENT.getPostCommentsByUser);
+app.post("/postCommentsByPost", POST_COMMENT.getPostCommentsByPost);
 // POST_LIKE
 app
     .route("/postLike")
@@ -132,6 +134,8 @@ app
     .get(POST_LIKE.getPostLikeById)
     .put(POST_LIKE.updatePostLike)
     .delete(POST_LIKE.deletePostLike);
+app.post("/postLikesByUser", POST_LIKE.getPostLikesByUser);
+app.post("/postLikesByPost", POST_LIKE.getPostLikesByPost);
 // USER
 app.route("/user").get(USER.getUsers).post(USER.createUser);
 app.post("/userByEmail", USER.getUserByEmail);

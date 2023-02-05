@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePostComment = exports.updatePostComment = exports.createPostComment = exports.getPostCommentById = exports.getPostComments = void 0;
+exports.deletePostComment = exports.updatePostComment = exports.createPostComment = exports.getPostCommentsByUser = exports.getPostCommentsByPost = exports.getPostCommentById = exports.getPostComments = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getPostComments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,6 +42,38 @@ const getPostCommentById = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getPostCommentById = getPostCommentById;
+const getPostCommentsByPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { postId } = req.body;
+    if (!postId) {
+        return res.status(400).send({ error: "postId is required" });
+    }
+    try {
+        const postComment = yield prisma.postComment.findMany({
+            where: { postId: Number(postId) },
+        });
+        res.json(postComment);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getPostCommentsByPost = getPostCommentsByPost;
+const getPostCommentsByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
+    try {
+        const postComment = yield prisma.postComment.findMany({
+            where: { userId: Number(userId) },
+        });
+        res.json(postComment);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getPostCommentsByUser = getPostCommentsByUser;
 const createPostComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, postId, text } = req.body;
     if (!userId) {

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePostLike = exports.updatePostLike = exports.createPostLike = exports.getPostLikeById = exports.getPostLikes = void 0;
+exports.deletePostLike = exports.updatePostLike = exports.createPostLike = exports.getPostLikesByUser = exports.getPostLikesByPost = exports.getPostLikeById = exports.getPostLikes = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getPostLikes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,6 +42,38 @@ const getPostLikeById = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getPostLikeById = getPostLikeById;
+const getPostLikesByPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { postId } = req.body;
+    if (!postId) {
+        return res.status(400).send({ error: "postId is required" });
+    }
+    try {
+        const postLike = yield prisma.postLike.findMany({
+            where: { postId: Number(postId) },
+        });
+        res.json(postLike);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getPostLikesByPost = getPostLikesByPost;
+const getPostLikesByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
+    try {
+        const postLike = yield prisma.postLike.findMany({
+            where: { userId: Number(userId) },
+        });
+        res.json(postLike);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getPostLikesByUser = getPostLikesByUser;
 const createPostLike = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, postId } = req.body;
     if (!userId) {

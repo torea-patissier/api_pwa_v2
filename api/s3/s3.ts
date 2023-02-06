@@ -28,3 +28,22 @@ export const createAmazonBucket = async (req: Request, res: Response) => {
 };
 
 // upload an objet to S3 bucket
+export const addObject = async (req: Request, res: Response) => {
+    const params = {
+        Bucket: "ybook2",
+        Key: "ybook.pdf",
+        Body: new Buffer('Juste un fichier')
+    }
+    try {
+        const data = await s3Client.putObject(params, (err,data)=>{
+            if (err){
+                console.error(err);
+            }
+            console.log("Success", data);
+            res.status(200).json({message: "Fichier ajouté"});
+        })
+    } catch (err) {
+        console.log("Error", err);
+        res.status(400).json({message: err});
+    }
+};

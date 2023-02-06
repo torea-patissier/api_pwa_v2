@@ -115,6 +115,7 @@ app
 
 // S3
 app.post("/createbucket",S3.createAmazonBucket);
+app.post("/addObject", S3.addObject);
 
 app.listen(port, () => {
   console.log(`⚡️ Server is running at http://localhost:${port}`);

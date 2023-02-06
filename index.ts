@@ -9,6 +9,7 @@ import * as POST from "./api/post";
 import * as POST_ATTACHMENT from "./api/postAttachment";
 import * as POST_LIKE from "./api/postLike";
 import * as USER from "./api/user";
+import * as S3 from "./api/s3/s3"
 
 dotenv.config();
 const cors = require("cors");
@@ -110,6 +111,10 @@ app
   .get(USER.getUserById)
   .put(USER.updateUser)
   .delete(USER.deleteUser);
+
+
+// S3
+app.post("/createbucket",S3.createAmazonBucket);
 
 app.listen(port, () => {
   console.log(`⚡️ Server is running at http://localhost:${port}`);

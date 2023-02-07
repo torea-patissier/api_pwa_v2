@@ -9,9 +9,12 @@ import * as POST from "./api/post";
 import * as POST_ATTACHMENT from "./api/postAttachment";
 import * as POST_LIKE from "./api/postLike";
 import * as USER from "./api/user";
-import * as S3 from "./api/s3/s3"
+import * as S3 from "./api/s3/s3";
+import multer from "multer";
 
-dotenv.config();
+const upload = multer ({dest: './upload/'})
+
+dotenv.config({path: './.env'});
 const cors = require("cors");
 const app: Express = express();
 app.use(express.json(), cors());
@@ -114,8 +117,36 @@ app
 
 
 // S3
-app.post("/createbucket",S3.createAmazonBucket);
-app.post("/addObject", S3.addObject);
+//app.post("/createbucket",S3.createAmazonBucket);
+//app.post("/addObject", S3.addObject);
+
+app.post("/uploadImages",upload.single('image'), async(req:Request, res: Response)=>{
+  try{
+    const file = req.file;
+    console.log(file);
+    const result = await S3.Upload(file);
+    console.log(result);
+    res.status(200).json({message: `Fichier ${result.Key} uploadé`})
+  }catch(err){
+    res.status(500).json(err)
+  }
+  
+})
+
+app.get("/getImages/:key", (req:Request, res:Response)=>{
+  try{
+    const key = req.params.key
+    console.log(key)
+    const readStream = S3.Download(key)
+  
+    console.log(readStream)
+    res.status(200).json({message: "Fichier téléchargé!"})
+  }catch(err){
+    res.status(500).json(err)
+  }
+  
+
+})
 
 app.listen(port, () => {
   console.log(`⚡️ Server is running at http://localhost:${port}`);

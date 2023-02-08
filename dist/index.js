@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -37,7 +46,10 @@ const POST = __importStar(require("./api/post"));
 const POST_ATTACHMENT = __importStar(require("./api/postAttachment"));
 const POST_LIKE = __importStar(require("./api/postLike"));
 const USER = __importStar(require("./api/user"));
-dotenv_1.default.config();
+const S3 = __importStar(require("./api/s3/s3"));
+const multer_1 = __importDefault(require("multer"));
+const upload = (0, multer_1.default)({ dest: './upload/' });
+dotenv_1.default.config({ path: './.env' });
 const cors = require("cors");
 const app = (0, express_1.default)();
 app.use(express_1.default.json(), cors());
@@ -127,6 +139,33 @@ app
     .get(USER.getUserById)
     .put(USER.updateUser)
     .delete(USER.deleteUser);
+// S3
+app.post("/createbucket", S3.createAmazonBucket);
+//app.post("/addObject", S3.addObject);
+app.post("/uploadImages", upload.single('image'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const file = req.file;
+        console.log(file);
+        const result = yield S3.Upload(file);
+        console.log(result);
+        res.status(200).json({ message: `Fichier ${result.Key} uploadé` });
+    }
+    catch (err) {
+        res.status(500).json(err);
+    }
+}));
+app.get("/getImages/:key", (req, res) => {
+    try {
+        const key = req.params.key;
+        console.log(key);
+        const readStream = S3.Download(key);
+        console.log(readStream);
+        res.status(200).json({ message: "Fichier téléchargé!" });
+    }
+    catch (err) {
+        res.status(500).json(err);
+    }
+});
 app.listen(port, () => {
     console.log(`⚡️ Server is running at http://localhost:${port}`);
 });

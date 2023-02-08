@@ -117,7 +117,7 @@ app
 
 
 // S3
-//app.post("/createbucket",S3.createAmazonBucket);
+app.post("/createbucket",S3.createAmazonBucket);
 //app.post("/addObject", S3.addObject);
 
 app.post("/uploadImages",upload.single('image'), async(req:Request, res: Response)=>{

@@ -16,16 +16,11 @@ const s3Client = new S3({
 
 // Create the Amazon S3 bucket.
 export const createAmazonBucket = async (req: Request, res: Response) => {
-    const bucketName = "ybook2"
+    const bucketName = "ybook3"
     const params = {Bucket: bucketName}
     try {
-        const data = await s3Client.createBucket(params, (err,data)=>{
-            if (err){
-                console.error(err);
-            }
-            console.log("Success", data);
-            res.status(200).json({message: "Bucket créé!"});
-        })
+        const data = await s3Client.createBucket(params).promise()
+        res.status(200).json({message: "Je suis créé"})
     } catch (err) {
         console.log("Error", err);
         res.status(400).json({message: err});
@@ -33,7 +28,7 @@ export const createAmazonBucket = async (req: Request, res: Response) => {
 };
 
 // upload an objet to S3 bucket
-export const addObject = async (req: Request, res: Response) => {
+/*export const addObject = async (req: Request, res: Response) => {
     const params = {
         Bucket: "ybook2",
         Key: "ybook2.pdf",
@@ -54,7 +49,7 @@ export const addObject = async (req: Request, res: Response) => {
 };
 
 //Collect an object from S3 bucket
-/*export const collectObject = async (req: Request, res: Response) => {
+export const collectObject = async (req: Request, res: Response) => {
     const params = {
         Bucket: "ybook2",
         Key: "ybook.pdf",

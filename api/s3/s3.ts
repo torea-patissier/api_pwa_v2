@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
 import { S3 } from "aws-sdk";
 import fs from "fs";
+import { Download, Upload } from "./upload";
 
-/*const region = process.env.REGION;
-const accessKeyId = process.env.ACCESS_KEY;
-const secretAccessKey = process.env.SECRET_KEY;*/
 
 // Create s3 object
 const s3Client = new S3({
@@ -27,71 +25,37 @@ export const createAmazonBucket = async (req: Request, res: Response) => {
     }
 };
 
-// upload an objet to S3 bucket
-/*export const addObject = async (req: Request, res: Response) => {
-    const params = {
-        Bucket: "ybook2",
-        Key: "ybook2.pdf",
-        Body: new Buffer('Juste un file')
-    }
-    try {
-        const data = await s3Client.putObject(params, (err,data)=>{
-            if (err){
-                console.error(err);
-            }
-            console.log("Success", data);
-            res.status(200).json({message: "Fichier ajouté"});
-        })
-    } catch (err) {
-        console.log("Error", err);
-        res.status(400).json({message: err});
-    }
-};
-
-//Collect an object from S3 bucket
-export const collectObject = async (req: Request, res: Response) => {
-    const params = {
-        Bucket: "ybook2",
-        Key: "ybook.pdf",
-        Body: new Buffer('Juste un fichier')
-    }
-    try {
-        const data = await s3Client.putObject(params, (err,data)=>{
-            if (err){
-                console.error(err);
-            }
-            console.log("Success", data);
-            res.status(200).json({message: "Fichier ajouté"});
-        })
-    } catch (err) {
-        console.log("Error", err);
-        res.status(400).json({message: err});
-    }
-};*/
 
 //Upload a file to S3
 
-export const Upload = (file: any)=> {
-    const fileStream = fs.createReadStream(file.path)
-    
-    const uploadParams = {
-        Bucket: "ybook2",
-        Body: fileStream,
-        Key: file.originalname
+export const uploadFile = async(req:Request, res: Response)=>{
+    try{
+      const file = req.file;
+      console.log(file);
+      const result = await Upload(file);
+      console.log(result);
+      res.status(200).json({message: `Fichier ${result.Key} uploadé`})
+    }catch(err){
+      res.status(500).json(err)
     }
-
-    return s3Client.upload(uploadParams).promise()
-}
+    
+  }
 
 //Download a file from S3
 
-export const Download = (filekey: any)=> {
-    const params = {
-        Bucket: "ybook2",
-        Key: filekey
+export const downloadFile = (req:Request, res:Response)=>{
+    try{
+      const key = req.params.key
+      console.log(key)
+      const readStream = Download(key)
+      console.log(readStream.pipe(res))
+      readStream.pipe(res)
+      res.status(200).json({message: "Fichier téléchargé!"})
+    }catch(err){
+      res.status(500).json(err)
     }
-
-    return s3Client.getObject(params).createReadStream()
-}
+    
+  
+  }
 
 

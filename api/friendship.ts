@@ -3,6 +3,12 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+enum FriendshipStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  IGNORED = "IGNORED",
+}
+
 export const getFriendships = async (req: Request, res: Response) => {
   try {
     const friendships = await prisma.friendship.findMany({
@@ -31,16 +37,35 @@ export const getFriendshipById = async (req: Request, res: Response) => {
   }
 };
 
-export const getFriendshipsByUserAndStatus = async (
-  req: Request,
-  res: Response
-) => {
-  const { userId, status } = req.body;
+export const getAllFriendshipsByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
   if (!userId) {
     return res.status(400).send({ error: "userId is required" });
   }
-  if (!status) {
-    return res.status(400).send({ error: "status is required" });
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [
+          {
+            fromId: Number(userId),
+          },
+          { toId: Number(userId) },
+        ],
+      },
+    });
+    res.json(friendships);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const getFriendshipsAcceptedByUser = async (
+  req: Request,
+  res: Response
+) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
   }
   try {
     const friendships = await prisma.friendship.findMany({
@@ -52,8 +77,29 @@ export const getFriendshipsByUserAndStatus = async (
           { toId: Number(userId) },
         ],
         AND: {
-          status: status,
+          status: FriendshipStatus.ACCEPTED,
         },
+      },
+    });
+    res.json(friendships);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const getFriendshipsPendingByUser = async (
+  req: Request,
+  res: Response
+) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        toId: Number(userId),
+        status: FriendshipStatus.PENDING,
       },
     });
     res.json(friendships);

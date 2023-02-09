@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFriendship = exports.updateFriendship = exports.createFriendship = exports.getFriendshipsSuggestion = exports.getFriendshipsPendingByUser = exports.getFriendshipsAcceptedByUser = exports.getAllFriendshipsByUser = exports.getFriendshipById = exports.getFriendships = void 0;
+exports.deleteFriendship = exports.updateFriendship = exports.createFriendship = exports.getFriendshipsSuggestion = exports.getFriendshipsPendingByUser = exports.getFriendshipsAcceptedByUser = exports.getAllFriendshipsByUser = exports.getFriendshipById = exports.getFriendships = exports.FriendshipStatus = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 var FriendshipStatus;
@@ -17,7 +17,7 @@ var FriendshipStatus;
     FriendshipStatus["PENDING"] = "PENDING";
     FriendshipStatus["ACCEPTED"] = "ACCEPTED";
     FriendshipStatus["IGNORED"] = "IGNORED";
-})(FriendshipStatus || (FriendshipStatus = {}));
+})(FriendshipStatus = exports.FriendshipStatus || (exports.FriendshipStatus = {}));
 const getFriendships = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const friendships = yield prisma.friendship.findMany({

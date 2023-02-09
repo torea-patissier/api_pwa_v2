@@ -91,8 +91,10 @@ app
   .get(FRIENDSHIP.getFriendshipById)
   .put(FRIENDSHIP.updateFriendship)
   .delete(FRIENDSHIP.deleteFriendship);
-app.post("/friendshipsByUserAndStatus", FRIENDSHIP.getFriendshipsByUserAndStatus);
+app.post("/friendshipsAcceptedByUser", FRIENDSHIP.getFriendshipsAcceptedByUser);
+app.post("/friendshipsPendingByUser", FRIENDSHIP.getFriendshipsPendingByUser);
 app.post("/friendshipsSuggestion", FRIENDSHIP.getFriendshipsSuggestion);
+app.post("/friendshipsByUser", FRIENDSHIP.getAllFriendshipsByUser);
 
 // NOTIFICATION
 app
@@ -104,6 +106,7 @@ app
   .get(NOTIFICATION.getNotificationById)
   .put(NOTIFICATION.updateNotification)
   .delete(NOTIFICATION.deleteNotification);
+  app.post("/notificationsByUser", NOTIFICATION.getNotificationsByUser);
 
 // POST
 app.route("/post").get(POST.getPosts).post(POST.createPost);

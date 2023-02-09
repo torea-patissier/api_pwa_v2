@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteNotification = exports.updateNotification = exports.createNotification = exports.getNotificationsByUser = exports.getNotificationById = exports.getNotifications = void 0;
+const models_1 = require("./../../react-ybook/src/models/models");
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getNotifications = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -57,7 +58,7 @@ const getNotificationsByUser = (req, res) => __awaiter(void 0, void 0, void 0, f
                     { toId: Number(userId) },
                 ],
                 AND: {
-                    status: "PENDING",
+                    status: models_1.FriendshipStatus.PENDING,
                 },
             },
         });

@@ -138,8 +138,8 @@ app.get("/getImages/:key", (req:Request, res:Response)=>{
     const key = req.params.key
     console.log(key)
     const readStream = S3.Download(key)
-  
-    console.log(readStream)
+    console.log(readStream.pipe(res))
+    readStream.pipe(res)
     res.status(200).json({message: "Fichier téléchargé!"})
   }catch(err){
     res.status(500).json(err)

@@ -16,11 +16,11 @@ const s3Client = new S3({
 
 // Create the Amazon S3 bucket.
 export const createAmazonBucket = async (req: Request, res: Response) => {
-    const bucketName = "ybook3"
+    const bucketName = "ybook4"
     const params = {Bucket: bucketName}
     try {
         const data = await s3Client.createBucket(params).promise()
-        res.status(200).json({message: "Je suis créé"})
+        res.status(200).json({data})
     } catch (err) {
         console.log("Error", err);
         res.status(400).json({message: err});
@@ -93,3 +93,5 @@ export const Download = (filekey: any)=> {
 
     return s3Client.getObject(params).createReadStream()
 }
+
+

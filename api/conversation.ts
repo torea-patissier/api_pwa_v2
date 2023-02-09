@@ -31,6 +31,28 @@ export const getConversationById = async (req: Request, res: Response) => {
   }
 };
 
+export const getConversationsByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  try {
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        OR: [
+          {
+            fromId: Number(userId),
+          },
+          { toId: Number(userId) },
+        ],
+      },
+    });
+    res.json(conversations);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createConversation = async (req: Request, res: Response) => {
   const { fromId, toId } = req.body;
   if (!fromId) {

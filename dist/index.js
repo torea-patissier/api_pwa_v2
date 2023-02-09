@@ -38,11 +38,30 @@ const POST_ATTACHMENT = __importStar(require("./api/postAttachment"));
 const POST_COMMENT = __importStar(require("./api/postComment"));
 const POST_LIKE = __importStar(require("./api/postLike"));
 const USER = __importStar(require("./api/user"));
+const http_1 = __importDefault(require("http"));
+const socket_io_1 = require("socket.io");
+const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
-const cors = require("cors");
 const app = (0, express_1.default)();
-app.use(express_1.default.json(), cors());
+app.use(express_1.default.json(), (0, cors_1.default)());
 const port = process.env.PORT || 8000;
+// Socket.io
+const server = http_1.default.createServer(app);
+const io = new socket_io_1.Server(server, { cors: { origin: "*" } });
+io.on("connection", (socket) => {
+    console.log(`Nouvelle connexion: ${socket.id}`);
+    socket.on("join", (room) => {
+        console.log(`Rejoindre la room: ${room}`);
+        socket.join(room);
+    });
+    socket.on("message", (msg, room) => {
+        console.log(`Message reçu: ${msg}`);
+        io.to(room).emit("message", msg);
+    });
+    socket.on("disconnect", () => {
+        console.log(`Déconnexion: ${socket.id}`);
+    });
+});
 app.get("/", (req, res) => {
     res.send("API YBook !");
 });
@@ -64,6 +83,7 @@ app
     .get(CONVERSATION.getConversationById)
     .put(CONVERSATION.updateConversation)
     .delete(CONVERSATION.deleteConversation);
+app.post("/conversationsByUser", CONVERSATION.getConversationsByUser);
 // CONVERSATION_MESSAGE
 app
     .route("/conversationMessage")
@@ -74,6 +94,7 @@ app
     .get(CONVERSATION_MESSAGE.getConversationMessageById)
     .put(CONVERSATION_MESSAGE.updateConversationMessage)
     .delete(CONVERSATION_MESSAGE.deleteConversationMessage);
+app.post("/conversationMessagesByConversation", CONVERSATION_MESSAGE.getConversationMessagesByConversationId);
 // FRIENDSHIP
 app
     .route("/friendship")
@@ -144,6 +165,6 @@ app
     .get(USER.getUserById)
     .put(USER.updateUser)
     .delete(USER.deleteUser);
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`⚡️ Server is running at http://localhost:${port}`);
 });

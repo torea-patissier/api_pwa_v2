@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteConversationMessage = exports.updateConversationMessage = exports.createConversationMessage = exports.getConversationMessageById = exports.getConversationMessages = void 0;
+exports.deleteConversationMessage = exports.updateConversationMessage = exports.createConversationMessage = exports.getConversationMessagesByConversationId = exports.getConversationMessageById = exports.getConversationMessages = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getConversationMessages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,6 +42,22 @@ const getConversationMessageById = (req, res) => __awaiter(void 0, void 0, void 
     }
 });
 exports.getConversationMessageById = getConversationMessageById;
+const getConversationMessagesByConversationId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { conversationId } = req.body;
+    if (!conversationId) {
+        return res.status(404).send({ error: "conversationId is required" });
+    }
+    try {
+        const conversationMessage = yield prisma.conversationMessage.findMany({
+            where: { conversationId: Number(conversationId) },
+        });
+        res.json(conversationMessage);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getConversationMessagesByConversationId = getConversationMessagesByConversationId;
 const createConversationMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { conversationId, userId, content } = req.body;
     if (!conversationId) {

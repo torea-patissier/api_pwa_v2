@@ -10,12 +10,36 @@ import * as POST_ATTACHMENT from "./api/postAttachment";
 import * as POST_COMMENT from "./api/postComment";
 import * as POST_LIKE from "./api/postLike";
 import * as USER from "./api/user";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
 
 dotenv.config();
-const cors = require("cors");
 const app: Express = express();
 app.use(express.json(), cors());
 const port = process.env.PORT || 8000;
+
+// Socket.io
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
+
+io.on("connection", (socket: any) => {
+  console.log(`Nouvelle connexion: ${socket.id}`);
+
+  socket.on("join", (room: string) => {
+    console.log(`Rejoindre la room: ${room}`);
+    socket.join(room);
+  });
+
+  socket.on("message", (msg: string, room: string) => {
+    console.log(`Message reçu: ${msg}`);
+    io.to(room).emit("message", msg);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Déconnexion: ${socket.id}`);
+  });
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.send("API YBook !");
@@ -40,6 +64,7 @@ app
   .get(CONVERSATION.getConversationById)
   .put(CONVERSATION.updateConversation)
   .delete(CONVERSATION.deleteConversation);
+app.post("/conversationsByUser", CONVERSATION.getConversationsByUser);
 
 // CONVERSATION_MESSAGE
 app
@@ -51,6 +76,10 @@ app
   .get(CONVERSATION_MESSAGE.getConversationMessageById)
   .put(CONVERSATION_MESSAGE.updateConversationMessage)
   .delete(CONVERSATION_MESSAGE.deleteConversationMessage);
+app.post(
+  "/conversationMessagesByConversation",
+  CONVERSATION_MESSAGE.getConversationMessagesByConversationId
+);
 
 // FRIENDSHIP
 app
@@ -104,9 +133,8 @@ app
   .get(POST_COMMENT.getPostCommentById)
   .put(POST_COMMENT.updatePostComment)
   .delete(POST_COMMENT.deletePostComment);
-  app.post("/postCommentsByUser", POST_COMMENT.getPostCommentsByUser);
-  app.post("/postCommentsByPost", POST_COMMENT.getPostCommentsByPost);
-
+app.post("/postCommentsByUser", POST_COMMENT.getPostCommentsByUser);
+app.post("/postCommentsByPost", POST_COMMENT.getPostCommentsByPost);
 
 // POST_LIKE
 app
@@ -118,8 +146,8 @@ app
   .get(POST_LIKE.getPostLikeById)
   .put(POST_LIKE.updatePostLike)
   .delete(POST_LIKE.deletePostLike);
-  app.post("/postLikesByUser", POST_LIKE.getPostLikesByUser);
-  app.post("/postLikesByPost", POST_LIKE.getPostLikesByPost);
+app.post("/postLikesByUser", POST_LIKE.getPostLikesByUser);
+app.post("/postLikesByPost", POST_LIKE.getPostLikesByPost);
 
 // USER
 app.route("/user").get(USER.getUsers).post(USER.createUser);
@@ -130,6 +158,6 @@ app
   .put(USER.updateUser)
   .delete(USER.deleteUser);
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`⚡️ Server is running at http://localhost:${port}`);
 });

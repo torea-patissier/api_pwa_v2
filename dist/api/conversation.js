@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteConversation = exports.updateConversation = exports.createConversation = exports.getConversationById = exports.getConversations = void 0;
+exports.deleteConversation = exports.updateConversation = exports.createConversation = exports.getConversationsByUser = exports.getConversationById = exports.getConversations = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getConversations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,6 +42,29 @@ const getConversationById = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getConversationById = getConversationById;
+const getConversationsByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
+    try {
+        const conversations = yield prisma.conversation.findMany({
+            where: {
+                OR: [
+                    {
+                        fromId: Number(userId),
+                    },
+                    { toId: Number(userId) },
+                ],
+            },
+        });
+        res.json(conversations);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getConversationsByUser = getConversationsByUser;
 const createConversation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { fromId, toId } = req.body;
     if (!fromId) {

@@ -34,6 +34,25 @@ export const getConversationMessageById = async (
   }
 };
 
+export const getConversationMessagesByConversationId = async (
+  req: Request,
+  res: Response
+) => {
+  const { conversationId } = req.body;
+  if (!conversationId) {
+    return res.status(404).send({ error: "conversationId is required" });
+  }
+  try {
+    const conversationMessage = await prisma.conversationMessage.findMany({
+      where: { conversationId: Number(conversationId) },
+    });
+
+    res.json(conversationMessage);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createConversationMessage = async (
   req: Request,
   res: Response

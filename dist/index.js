@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -35,33 +44,16 @@ const FRIENDSHIP = __importStar(require("./api/friendship"));
 const NOTIFICATION = __importStar(require("./api/notification"));
 const POST = __importStar(require("./api/post"));
 const POST_ATTACHMENT = __importStar(require("./api/postAttachment"));
-const POST_COMMENT = __importStar(require("./api/postComment"));
 const POST_LIKE = __importStar(require("./api/postLike"));
 const USER = __importStar(require("./api/user"));
-const http_1 = __importDefault(require("http"));
-const socket_io_1 = require("socket.io");
-const cors_1 = __importDefault(require("cors"));
-dotenv_1.default.config();
+const S3 = __importStar(require("./api/s3/s3"));
+const multer_1 = __importDefault(require("multer"));
+const upload = (0, multer_1.default)({ dest: './upload/' });
+dotenv_1.default.config({ path: './.env' });
+const cors = require("cors");
 const app = (0, express_1.default)();
-app.use(express_1.default.json(), (0, cors_1.default)());
+app.use(express_1.default.json(), cors());
 const port = process.env.PORT || 8000;
-// Socket.io
-const server = http_1.default.createServer(app);
-const io = new socket_io_1.Server(server, { cors: { origin: "*" } });
-io.on("connection", (socket) => {
-    console.log(`Nouvelle connexion: ${socket.id}`);
-    socket.on("join", (room) => {
-        console.log(`Rejoindre la room: ${room}`);
-        socket.join(room);
-    });
-    socket.on("message", (msg, room) => {
-        console.log(`Message reçu: ${msg}`);
-        io.to(room).emit("message", msg);
-    });
-    socket.on("disconnect", () => {
-        console.log(`Déconnexion: ${socket.id}`);
-    });
-});
 app.get("/", (req, res) => {
     res.send("API YBook !");
 });
@@ -83,7 +75,6 @@ app
     .get(CONVERSATION.getConversationById)
     .put(CONVERSATION.updateConversation)
     .delete(CONVERSATION.deleteConversation);
-app.post("/conversationsByUser", CONVERSATION.getConversationsByUser);
 // CONVERSATION_MESSAGE
 app
     .route("/conversationMessage")
@@ -94,7 +85,6 @@ app
     .get(CONVERSATION_MESSAGE.getConversationMessageById)
     .put(CONVERSATION_MESSAGE.updateConversationMessage)
     .delete(CONVERSATION_MESSAGE.deleteConversationMessage);
-app.post("/conversationMessagesByConversation", CONVERSATION_MESSAGE.getConversationMessagesByConversationId);
 // FRIENDSHIP
 app
     .route("/friendship")
@@ -105,10 +95,6 @@ app
     .get(FRIENDSHIP.getFriendshipById)
     .put(FRIENDSHIP.updateFriendship)
     .delete(FRIENDSHIP.deleteFriendship);
-app.post("/friendshipsAcceptedByUser", FRIENDSHIP.getFriendshipsAcceptedByUser);
-app.post("/friendshipsPendingByUser", FRIENDSHIP.getFriendshipsPendingByUser);
-app.post("/friendshipsSuggestion", FRIENDSHIP.getFriendshipsSuggestion);
-app.post("/friendshipsByUser", FRIENDSHIP.getAllFriendshipsByUser);
 // NOTIFICATION
 app
     .route("/notification")
@@ -119,7 +105,6 @@ app
     .get(NOTIFICATION.getNotificationById)
     .put(NOTIFICATION.updateNotification)
     .delete(NOTIFICATION.deleteNotification);
-app.post("/notificationsByUser", NOTIFICATION.getNotificationsByUser);
 // POST
 app.route("/post").get(POST.getPosts).post(POST.createPost);
 app
@@ -127,7 +112,6 @@ app
     .get(POST.getPostById)
     .put(POST.updatePost)
     .delete(POST.deletePost);
-app.post("/postsByUser", POST.getPostsByUser);
 // POST_ATTACHMENT
 app
     .route("/postAttachment")
@@ -138,18 +122,6 @@ app
     .get(POST_ATTACHMENT.getPostAttachmentById)
     .put(POST_ATTACHMENT.updatePostAttachment)
     .delete(POST_ATTACHMENT.deletePostAttachment);
-// POST_COMMENT
-app
-    .route("/postComment")
-    .get(POST_COMMENT.getPostComments)
-    .post(POST_COMMENT.createPostComment);
-app
-    .route("/postComment/:id")
-    .get(POST_COMMENT.getPostCommentById)
-    .put(POST_COMMENT.updatePostComment)
-    .delete(POST_COMMENT.deletePostComment);
-app.post("/postCommentsByUser", POST_COMMENT.getPostCommentsByUser);
-app.post("/postCommentsByPost", POST_COMMENT.getPostCommentsByPost);
 // POST_LIKE
 app
     .route("/postLike")
@@ -160,16 +132,40 @@ app
     .get(POST_LIKE.getPostLikeById)
     .put(POST_LIKE.updatePostLike)
     .delete(POST_LIKE.deletePostLike);
-app.post("/postLikesByUser", POST_LIKE.getPostLikesByUser);
-app.post("/postLikesByPost", POST_LIKE.getPostLikesByPost);
 // USER
 app.route("/user").get(USER.getUsers).post(USER.createUser);
-app.post("/userByEmail", USER.getUserByEmail);
 app
     .route("/user/:id")
     .get(USER.getUserById)
     .put(USER.updateUser)
     .delete(USER.deleteUser);
-server.listen(port, () => {
+// S3
+app.post("/createbucket", S3.createAmazonBucket);
+//app.post("/addObject", S3.addObject);
+app.post("/uploadImages", upload.single('image'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const file = req.file;
+        console.log(file);
+        const result = yield S3.Upload(file);
+        console.log(result);
+        res.status(200).json({ message: `Fichier ${result.Key} uploadé` });
+    }
+    catch (err) {
+        res.status(500).json(err);
+    }
+}));
+app.get("/getImages/:key", (req, res) => {
+    try {
+        const key = req.params.key;
+        console.log(key);
+        const readStream = S3.Download(key);
+        console.log(readStream);
+        res.status(200).json({ message: "Fichier téléchargé!" });
+    }
+    catch (err) {
+        res.status(500).json(err);
+    }
+});
+app.listen(port, () => {
     console.log(`⚡️ Server is running at http://localhost:${port}`);
 });

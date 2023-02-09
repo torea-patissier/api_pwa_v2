@@ -31,6 +31,41 @@ export const getNotificationById = async (req: Request, res: Response) => {
   }
 };
 
+export const getNotificationsByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [
+          {
+            fromId: Number(userId),
+          },
+          { toId: Number(userId) },
+        ],
+        AND: {
+          status: "PENDING",
+        },
+      },
+    });
+    const friendIds = friendships.map((friendship) => {
+      return friendship.id;
+    });
+    const notifications = await prisma.notification.findMany({
+      where: {
+        friendshipId: {
+          in: friendIds,
+        },
+      },
+    });
+    res.json(notifications);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createNotification = async (req: Request, res: Response) => {
   const { read, friendshipId, conversationMessageId } = req.body;
   if (!read) {
@@ -69,7 +104,7 @@ export const updateNotification = async (req: Request, res: Response) => {
     if (!notification) {
       return res.status(404).send({ error: "Notification not found" });
     }
-    await prisma.notification.update({
+    const newNotification = await prisma.notification.update({
       where: { id: Number(id) },
       data: {
         read: read,
@@ -77,7 +112,7 @@ export const updateNotification = async (req: Request, res: Response) => {
         conversationMessageId: conversationMessageId,
       },
     });
-    res.json(notification);
+    res.json(newNotification);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

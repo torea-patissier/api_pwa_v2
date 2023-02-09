@@ -3,131 +3,137 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const getPostLikes = async (req: Request, res: Response) => {
+export const getPostComments = async (req: Request, res: Response) => {
   try {
-    const postLikes = await prisma.postLike.findMany({
+    const postComments = await prisma.postComment.findMany({
       orderBy: {
         updatedAt: "desc",
       },
     });
-    res.json(postLikes);
+    res.json(postComments);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const getPostLikeById = async (req: Request, res: Response) => {
+export const getPostCommentById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const postLike = await prisma.postLike.findUnique({
+    const postComment = await prisma.postComment.findUnique({
       where: { id: Number(id) },
     });
-    if (!postLike) {
-      return res.status(404).send({ error: "PostLike not found" });
+    if (!postComment) {
+      return res.status(404).send({ error: "PostComment not found" });
     }
-    res.json(postLike);
+    res.json(postComment);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const getPostLikesByPost = async (req: Request, res: Response) => {
+export const getPostCommentsByPost = async (req: Request, res: Response) => {
   const { postId } = req.body;
   if (!postId) {
     return res.status(400).send({ error: "postId is required" });
   } 
   try {
-    const postLike = await prisma.postLike.findMany({
+    const postComment = await prisma.postComment.findMany({
       where: { postId: Number(postId) },
     });
-    res.json(postLike);
+    res.json(postComment);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const getPostLikesByUser = async (req: Request, res: Response) => {
+export const getPostCommentsByUser = async (req: Request, res: Response) => {
   const { userId } = req.body;
   if (!userId) {
     return res.status(400).send({ error: "userId is required" });
   } 
   try {
-    const postLike = await prisma.postLike.findMany({
+    const postComment = await prisma.postComment.findMany({
       where: { userId: Number(userId) },
     });
-    res.json(postLike);
+    res.json(postComment);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const createPostLike = async (req: Request, res: Response) => {
-  const { userId, postId } = req.body;
+export const createPostComment = async (req: Request, res: Response) => {
+  const { userId, postId, text } = req.body;
   if (!userId) {
     return res.status(400).send({ error: "userId is required" });
   } else if (!postId) {
     return res.status(400).send({ error: "postId is required" });
+  } else if (!text) {
+    return res.status(400).send({ error: "text is required" });
   }
   try {
-    const postLike = await prisma.postLike.create({
+    const postComment = await prisma.postComment.create({
       data: {
         userId: userId,
         postId: postId,
+        text: text,
       },
     });
-    res.status(201).json(postLike);
+    res.status(201).json(postComment);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const updatePostLike = async (req: Request, res: Response) => {
+export const updatePostComment = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { userId, postId } = req.body;
+  const { userId, postId, text } = req.body;
   if (!userId) {
     return res.status(400).send({ error: "userId is required" });
   } else if (!postId) {
     return res.status(400).send({ error: "postId is required" });
+  } else if (!text) {
+    return res.status(400).send({ error: "text is required" });
   }
   try {
-    const postLike = await prisma.postLike.findUnique({
+    const postComment = await prisma.postComment.findUnique({
       where: {
         id: Number(id),
       },
     });
-    if (!postLike) {
-      return res.status(404).send({ error: "PostLike not found" });
+    if (!postComment) {
+      return res.status(404).send({ error: "PostComment not found" });
     }
-    const newPostLike = await prisma.postLike.update({
+    await prisma.postComment.update({
       where: { id: Number(id) },
       data: {
         userId: userId,
         postId: postId,
+        text: text,
       },
     });
-    res.json(newPostLike);
+    res.json(postComment);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const deletePostLike = async (req: Request, res: Response) => {
+export const deletePostComment = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const postLike = await prisma.postLike.findUnique({
+    const postComment = await prisma.postComment.findUnique({
       where: {
         id: Number(id),
       },
     });
-    if (!postLike) {
-      return res.status(404).send({ error: "PostLike not found" });
+    if (!postComment) {
+      return res.status(404).send({ error: "PostComment not found" });
     }
-    await prisma.postLike.delete({
+    await prisma.postComment.delete({
       where: {
         id: Number(id),
       },
     });
-    res.send({ message: "PostLike deleted successfully" });
+    res.send({ message: "PostComment deleted successfully" });
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

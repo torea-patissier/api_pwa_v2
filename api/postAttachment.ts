@@ -70,7 +70,7 @@ export const updatePostAttachment = async (req: Request, res: Response) => {
     if (!postAttachment) {
       return res.status(404).send({ error: "PostAttachment not found" });
     }
-    await prisma.postAttachment.update({
+    const newPostAttachment = await prisma.postAttachment.update({
       where: { id: Number(id) },
       data: {
         type: type,
@@ -78,7 +78,7 @@ export const updatePostAttachment = async (req: Request, res: Response) => {
         postId: postId,
       },
     });
-    res.json(postAttachment);
+    res.json(newPostAttachment);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

@@ -19,11 +19,35 @@ export const getConversations = async (req: Request, res: Response) => {
 export const getConversationById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const conversation = await prisma.conversation.findUnique({ where: { id: Number(id) } });
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: Number(id) },
+    });
     if (!conversation) {
       return res.status(404).send({ error: "Conversation not found" });
     }
     res.json(conversation);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const getConversationsByUser = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  try {
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        OR: [
+          {
+            fromId: Number(userId),
+          },
+          { toId: Number(userId) },
+        ],
+      },
+    });
+    res.json(conversations);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
@@ -66,11 +90,11 @@ export const updateConversation = async (req: Request, res: Response) => {
     if (!conversation) {
       return res.status(404).send({ error: "Conversation not found" });
     }
-    await prisma.conversation.update({
+    const newConversation = await prisma.conversation.update({
       where: { id: Number(id) },
       data: { fromId: fromId, toId: toId },
     });
-    res.json(conversation);
+    res.json(newConversation);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }

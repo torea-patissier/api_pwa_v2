@@ -16,10 +16,15 @@ export const getConversationMessages = async (req: Request, res: Response) => {
   }
 };
 
-export const getConversationMessageById = async (req: Request, res: Response) => {
+export const getConversationMessageById = async (
+  req: Request,
+  res: Response
+) => {
   const { id } = req.params;
   try {
-    const conversationMessage = await prisma.conversationMessage.findUnique({ where: { id: Number(id) } });
+    const conversationMessage = await prisma.conversationMessage.findUnique({
+      where: { id: Number(id) },
+    });
     if (!conversationMessage) {
       return res.status(404).send({ error: "ConversationMessage not found" });
     }
@@ -29,7 +34,29 @@ export const getConversationMessageById = async (req: Request, res: Response) =>
   }
 };
 
-export const createConversationMessage = async (req: Request, res: Response) => {
+export const getConversationMessagesByConversationId = async (
+  req: Request,
+  res: Response
+) => {
+  const { conversationId } = req.body;
+  if (!conversationId) {
+    return res.status(404).send({ error: "conversationId is required" });
+  }
+  try {
+    const conversationMessage = await prisma.conversationMessage.findMany({
+      where: { conversationId: Number(conversationId) },
+    });
+
+    res.json(conversationMessage);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const createConversationMessage = async (
+  req: Request,
+  res: Response
+) => {
   const { conversationId, userId, content } = req.body;
   if (!conversationId) {
     return res.status(400).send({ error: "conversationId is required" });
@@ -42,8 +69,8 @@ export const createConversationMessage = async (req: Request, res: Response) => 
     const conversationMessage = await prisma.conversationMessage.create({
       data: {
         conversationId: conversationId,
-        userId:  userId,
-        content:  content,
+        userId: userId,
+        content: content,
       },
     });
     res.status(201).json(conversationMessage);
@@ -52,7 +79,10 @@ export const createConversationMessage = async (req: Request, res: Response) => 
   }
 };
 
-export const updateConversationMessage = async (req: Request, res: Response) => {
+export const updateConversationMessage = async (
+  req: Request,
+  res: Response
+) => {
   const { id } = req.params;
   const { conversationId, userId, content } = req.body;
   if (!conversationId) {
@@ -71,19 +101,24 @@ export const updateConversationMessage = async (req: Request, res: Response) => 
     if (!conversationMessage) {
       return res.status(404).send({ error: "ConversationMessage not found" });
     }
-    await prisma.conversationMessage.update({
+    const newConversationMessage = await prisma.conversationMessage.update({
       where: { id: Number(id) },
-      data: { conversationId: conversationId,
-        userId:  userId,
-        content:  content,},
+      data: {
+        conversationId: conversationId,
+        userId: userId,
+        content: content,
+      },
     });
-    res.json(conversationMessage);
+    res.json(newConversationMessage);
   } catch (error: any) {
     res.status(500).send({ error: error.message });
   }
 };
 
-export const deleteConversationMessage = async (req: Request, res: Response) => {
+export const deleteConversationMessage = async (
+  req: Request,
+  res: Response
+) => {
   const { id } = req.params;
   try {
     const conversationMessage = await prisma.conversationMessage.findUnique({

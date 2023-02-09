@@ -31,6 +31,73 @@ export const getFriendshipById = async (req: Request, res: Response) => {
   }
 };
 
+export const getFriendshipsByUserAndStatus = async (
+  req: Request,
+  res: Response
+) => {
+  const { userId, status } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  if (!status) {
+    return res.status(400).send({ error: "status is required" });
+  }
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [
+          {
+            fromId: Number(userId),
+          },
+          { toId: Number(userId) },
+        ],
+        AND: {
+          status: status,
+        },
+      },
+    });
+    res.json(friendships);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const getFriendshipsSuggestion = async (req: Request, res: Response) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).send({ error: "userId is required" });
+  }
+  try {
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        OR: [
+          {
+            fromId: Number(userId),
+          },
+          { toId: Number(userId) },
+        ],
+      },
+    });
+    const friendIds = friendships.map((friendship) => {
+      if (friendship.fromId === Number(userId)) {
+        return friendship.toId;
+      }
+      return friendship.fromId;
+    });
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          notIn: friendIds,
+        },
+      },
+    });
+
+    res.json(users);
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
 export const createFriendship = async (req: Request, res: Response) => {
   const { status, fromId, toId } = req.body;
   if (!status) {

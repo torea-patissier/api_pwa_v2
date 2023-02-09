@@ -105,6 +105,8 @@ app
     .get(FRIENDSHIP.getFriendshipById)
     .put(FRIENDSHIP.updateFriendship)
     .delete(FRIENDSHIP.deleteFriendship);
+app.post("/friendshipsByUserAndStatus", FRIENDSHIP.getFriendshipsByUserAndStatus);
+app.post("/friendshipsSuggestion", FRIENDSHIP.getFriendshipsSuggestion);
 // NOTIFICATION
 app
     .route("/notification")

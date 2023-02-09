@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFriendship = exports.updateFriendship = exports.createFriendship = exports.getFriendshipById = exports.getFriendships = void 0;
+exports.deleteFriendship = exports.updateFriendship = exports.createFriendship = exports.getFriendshipsSuggestion = exports.getFriendshipsByUserAndStatus = exports.getFriendshipById = exports.getFriendships = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getFriendships = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -42,6 +42,71 @@ const getFriendshipById = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getFriendshipById = getFriendshipById;
+const getFriendshipsByUserAndStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId, status } = req.body;
+    if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
+    if (!status) {
+        return res.status(400).send({ error: "status is required" });
+    }
+    try {
+        const friendships = yield prisma.friendship.findMany({
+            where: {
+                OR: [
+                    {
+                        fromId: Number(userId),
+                    },
+                    { toId: Number(userId) },
+                ],
+                AND: {
+                    status: status,
+                },
+            },
+        });
+        res.json(friendships);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getFriendshipsByUserAndStatus = getFriendshipsByUserAndStatus;
+const getFriendshipsSuggestion = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.body;
+    if (!userId) {
+        return res.status(400).send({ error: "userId is required" });
+    }
+    try {
+        const friendships = yield prisma.friendship.findMany({
+            where: {
+                OR: [
+                    {
+                        fromId: Number(userId),
+                    },
+                    { toId: Number(userId) },
+                ],
+            },
+        });
+        const friendIds = friendships.map((friendship) => {
+            if (friendship.fromId === Number(userId)) {
+                return friendship.toId;
+            }
+            return friendship.fromId;
+        });
+        const users = yield prisma.user.findMany({
+            where: {
+                id: {
+                    notIn: friendIds,
+                },
+            },
+        });
+        res.json(users);
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+exports.getFriendshipsSuggestion = getFriendshipsSuggestion;
 const createFriendship = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { status, fromId, toId } = req.body;
     if (!status) {

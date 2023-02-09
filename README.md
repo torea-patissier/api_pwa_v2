@@ -17,7 +17,7 @@ Ce projet est une Progressive Web App (PWA). Il utilise les dernières technolog
 
 Clonez ce dépôt sur votre ordinateur:
 
-`git clone git@github.com:troleum-patissier/api_pwa_v2.git`
+`git clone git@github.com:torea-patissier/api_pwa_v2.git`
 
 Installez les dépendances nécessaires:
 
